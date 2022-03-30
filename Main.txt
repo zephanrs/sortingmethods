@@ -1,0 +1,279 @@
+﻿public class Main {
+	public static void main(String[] args) {
+		int[] a = { 4, 2, 7, 1, 8, 3, 6, 5, 9};
+		
+		printArray(a);
+		heap(a);
+		printArray(a);
+	}
+	
+	public static int[] heap(int[] a) {
+		buildHeap(a);
+		sortHeap(a);
+			
+		return a;
+	}
+	
+	public static void buildHeap(int[] a) {
+		for (int i = a.length - 1; i >= 0; i--) {
+			adjust(a, i, a.length - 1);
+		}
+	}
+	
+	public static void sortHeap(int[] a) {
+		for (int i = a.length - 1; i >= 0; i--) {
+			swap(i, 0, a);
+			adjust(a, 0, i - 1);
+//			printHeap(a);
+		}
+	}
+	
+	public static void adjust(int[] a, int i, int max) { // checks nuclear family
+		boolean[] b = hasChild(a, i, max);
+		int left = leftChild(i);
+		int right = rightChild(i);
+//		System.out.println(a[i]);
+		
+		if (b[0] && b[1]) { // i has two children
+//			System.out.println(a[i] + ", " + a[left] + ", " + a[right]);
+			if (a[left] > a[right]) { // which child is bigger
+				if (a[left] > a[i]) { // is child bigger than parent
+					swap(i, left, a);
+					adjust(a, left, max);
+				}
+			} else if (a[right] > a[i]) {
+				swap(right, i, a);
+				adjust(a, right, max);
+			}
+		} else if (b[0]) { // only 1 child (has to be left)
+//			System.out.println(a[i] + ", " + a[left]);
+			if (a[i] < a[left]) { // is child bigger than parent
+				swap(left, i, a);
+				adjust(a, left, max);
+			}
+		}
+	}
+	
+	public static int leftChild(int index) { return 2 * index + 1; }
+	public static int rightChild(int index) { return 2 * index + 2; }
+	
+	public static boolean[] hasChild(int[] a, int index, int max) {
+		boolean[] b = new boolean[2];
+		
+		b[0] = (max >= leftChild(index));
+		b[1] = (max >= rightChild(index));
+		
+		return b; // two booleans for children
+	}
+	
+	public static void printHeap(int[] a) {
+		for (int i = 1; i < Math.log(a.length)/Math.log(2) + 1; i++) {
+			for (int j = (int) Math.pow(2, i-1);
+					j < (int) Math.pow(2, i) && j <= a.length;
+					j++) {
+				System.out.print(a[j - 1] + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+	}
+	
+	
+	public static int[] merge(int[] a) { // left is bigger
+		if (a.length < 2) {
+			return a;
+		} else {
+			return merger(merge(half(a,0)), merge(half(a,1)));
+		}
+	}
+	
+	public static int[] half(int[] a, int firstlast) { // left should be larger
+		int length;
+		if (firstlast == 0) { // 0 is first
+			length = a.length - a.length/2;
+		} else {
+			length = a.length/2;
+		}
+		
+		int[] part = new int[length];
+		
+		for (int i = 0; i < length; i++) {
+			if (firstlast == 0) {
+				part[i] = a[i];
+			} else {
+				part[i] = a[i + a.length - length];
+			}
+		}
+		return part;
+	}
+	
+	public static int[] merger(int[] a,int[] b) { // a is always larger
+		int total = a.length + b.length;
+		int[] c = new int[total]; 
+		int aindex = 0;
+		int bindex = 0;
+		int index = 0;
+		
+		while (index < total) {
+			if (aindex == a.length) { // extra 
+				for (int i = bindex; i < b.length; i++) {
+					c[index] = b[i];
+					index++;
+				}
+				break;
+			} else if (bindex == b.length) {
+				for (int i = aindex; i < a.length; i++) {
+					c[index] = a[i];
+					index++;
+				}
+				break;
+			} else if (a[aindex] <= b[bindex]) { // <= to retain order if equal
+				c[index] = a[aindex]; // first a goes into c
+				aindex++;
+			} else { // first b goes into c
+				c[index] = b[bindex];
+				bindex++;
+			}
+			index++;
+		}
+		
+		return c;
+	}
+	
+	public static int[] bubble(int[] a) {
+		int comparisons = 0;
+		int swaps = 0;
+		
+		for (int i = a.length - 1; i > 0; i--) {
+			for (int j = 0; j < i; j++) {
+				comparisons++;
+				if (a[j] > a[j + 1]) {
+					swaps++;
+					swap(j, j + 1, a);
+				}
+			}
+		}
+		
+		System.out.println("Comparisons: " + comparisons + ", Swaps: " + swaps);
+		return a;
+	}
+
+	public static int[] selection(int[] a) {
+		int comparisons = 0;
+		int swaps = 0;
+		int smallIndex;
+		
+		for (int i = 0; i < a.length; i++) {
+			smallIndex = i;
+			for (int j = i + 1; j < a.length; j++) {
+				comparisons++;
+				if (a[smallIndex] > a[j]) {
+					smallIndex = j;
+				}
+			}
+			swaps++;
+			swap(i, smallIndex, a);
+		}
+		
+		System.out.println("Comparisons: " + comparisons + ", Swaps: " + swaps);
+		return a;
+	}
+	
+	public static int[] insertion(int[] a) {
+		int comparisons = 0;
+		int swaps = 0;
+		int X;
+		int compareIndex;
+		int index;
+		
+		
+		for (int i = 1; i < a.length; i++) {
+			index = i;
+			X = a[i];
+			compareIndex = i - 1;
+			
+				while (true) {
+					comparisons++;
+					if (compareIndex < 0 || X >= a[compareIndex]) { break; }
+					else if (X < a[compareIndex]) {
+						swaps++;
+						swap(compareIndex, index, a);
+						index--;
+						compareIndex--;
+					}
+				}
+		}
+		
+		System.out.println("Comparisons: " + comparisons + ", Swaps: " + swaps);
+		return a;
+	}
+	
+	public static double median(int[] a) {
+	    return quick(a, 0, a.length-1);
+	}
+	    
+	public static double quick(int[] a, int left, int right) { // helper
+	    if (right > left) { // if there are any ints left
+	        int pivotPos = partition(a, left, right); //0 and 6
+	        
+	        if (a.length % 2 == 1 && pivotPos == a.length / 2) { // checks if odd and is middle
+	        	return a[pivotPos];
+	        }
+	        else { // not odd, must be even
+	        	if (pivotPos == a.length / 2)  {// left center
+	        		return (a[pivotPos] + select(a, left, pivotPos - 1, "biggest")) / 2.0;
+	        	}
+	        	else if (pivotPos == (a.length / 2) - 1) {
+	        		return (a[pivotPos] + select(a, pivotPos + 1, right, "smallest")) / 2.0;
+	        	}
+	        }
+        	if (pivotPos > a.length / 2) {
+	        	return quick(a, left, pivotPos-1);
+	        } else {
+	        	return quick(a, pivotPos+1, right);
+	        }
+        }
+	    return a[left];
+	}
+	
+	public static int select(int[] a, int left, int right, String s) { // inclusive
+		int acc = a[left];
+		
+		for (int i = left + 1; i <= right; i++) {
+			if (s.equals("biggest")) {
+				if (a[i] > acc) { acc = a[i]; }
+			}
+			else {
+				if (a[i] < acc) { acc = a[i]; }
+			}
+		}
+		
+		return acc;
+	}
+	    
+	public static int partition(int[] a, int left, int right) { // right is pivot
+	    int splitPos = left;
+	    for (int i = left; i < right; i++) { // traverses array
+	        if (a[i] < a[right]) { // i less than last
+	            swap(i, splitPos,a ); // swap first and i
+	            splitPos++;
+	        }
+	    }
+	    swap(splitPos,right,a );
+	    return splitPos;
+	}
+	
+	public static void swap(int x, int y, int[] a) {
+		int temp = a[x];
+		a[x] = a[y];
+		a[y] = temp;
+	}
+	
+	public static void printArray(int[] a) {
+		String acc = "{ ";
+		for (int i : a) {acc = acc + i + ", "; }
+		acc = acc.substring(0, acc.length() - 2);
+		System.out.println(acc + " }");
+	}
+	
+}
